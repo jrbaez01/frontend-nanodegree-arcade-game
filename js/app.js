@@ -6,7 +6,7 @@ var Enemy = function(c) {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    this.speed = 150+50*c;
+    this.speed = 50+50*c;
     this.x = -101;
     this.y = 63+83*c;
 }
@@ -20,11 +20,11 @@ Enemy.prototype.update = function(dt) {
 
 
     // Cada vez que update() es llamada, la posicion "X" se incrementa en SPEED y cuando pasa de  505(tama;o del lienzo), se resetea, basic math, lol!
-    if (this.x <= 505)
-        this.x = this.x + this.speed*dt;
-    else
+    if (this.x <= 505){
+        this.x += this.speed*dt;
+    } else{
         this.x=-101;
-    //this.y = this.y % 3 + 1;
+    };
 }
 
 // Draw the enemy on the screen, required method for game
@@ -37,17 +37,29 @@ Enemy.prototype.render = function() {
 // a handleInput() method.
 var Player = function() {
     this.person = 'images/char-boy.png';
-    this.speed = 100;
-    this.x = 202;
-    this.y = 386;
+    this.setPosition(202,386)
 }
 
 Player.prototype.update = function() {
-
+    this.handleCollision();
 };
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.person), this.x, this.y);
+};
+
+Player.prototype.handleCollision = function() {
+    for (var i = 0; i < allEnemies.length; i++) {
+        //In order to make it more readable, I declare the enemy and player var.
+        var enemy = allEnemies[i];
+        var player = this;
+        //enemy.x+50.5 es el centro del bug
+        if (enemy.x+50 > player.x && enemy.x+50 < player.x+101 &&
+            enemy.x+66 > player.x && enemy.x+66 < player.x+101 &&
+            enemy.y > player.y && enemy.y < player.y+83) {
+            this.setPosition(202,386)
+        };
+    };
 };
 
 Player.prototype.handleInput = function(key) {
@@ -55,8 +67,11 @@ Player.prototype.handleInput = function(key) {
         this.x-=101;
     };
 
-    if (key == 'up' && this.y>386-86*3 ) {
-        this.y-=83;
+    if (key == 'up') {
+        if (this.y>386-86*3) {
+            this.y-=83;
+        } else
+            this.setPosition(202,386);
     };
 
     if (key == 'right' && this.x<404) {
@@ -68,6 +83,10 @@ Player.prototype.handleInput = function(key) {
     };
 };
 
+Player.prototype.setPosition = function(x,y) {
+    this.x = x;
+    this.y = y;
+};
 
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
