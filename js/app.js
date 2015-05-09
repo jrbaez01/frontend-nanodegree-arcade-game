@@ -6,7 +6,7 @@ var Enemy = function(c) {
     // The image/sprite for our enemies, this uses
     // a helper we've provided to easily load images
     this.sprite = 'images/enemy-bug.png';
-    this.speed = 50+50*c;
+    this.speed = this.ramdomInt(50,100);
     this.x = -101;
     this.y = 63+83*c;
 }
@@ -19,25 +19,35 @@ Enemy.prototype.update = function(dt) {
     // all computers.
 
 
-    // Cada vez que update() es llamada, la posicion "X" se incrementa en SPEED y cuando pasa de  505(tama;o del lienzo), se resetea, basic math, lol!
+    // Cada vez que update() es llamada, la posicion "X" se incrementa en SPEED y cuando pasa de  505(tama;o del lienzo), se resetea en una fila y velocidad diferente.
     if (this.x <= 505){
         this.x += this.speed*dt;
     } else{
-        this.x=-101;
+        this.x = -101;
+        this.y = 63+83*this.ramdomInt(0,2);
+        //mientra mas score mas rapido y furioso.
+        this.speed = player.score*5 + this.ramdomInt(50,150+player.score);
     };
 }
 
 // Draw the enemy on the screen, required method for game
 Enemy.prototype.render = function() {
     ctx.drawImage(Resources.get(this.sprite), this.x, this.y);
+
 }
+
+Enemy.prototype.ramdomInt = function(min, max) {
+  return Math.floor(Math.random() * (max+1 - min)) + min;
+};
 
 // Now write your own player class
 // This class requires an update(), render() and
 // a handleInput() method.
 var Player = function() {
     this.person = 'images/char-boy.png';
-    this.setPosition(202,386)
+    this.setPosition(202,386);
+    this.life = 3;
+    this.score = 0;
 }
 
 Player.prototype.update = function() {
@@ -46,6 +56,7 @@ Player.prototype.update = function() {
 
 Player.prototype.render = function() {
     ctx.drawImage(Resources.get(this.person), this.x, this.y);
+    //ctx.drawImage(Resources.get('images/heart.png'), 0, 0);
 };
 
 Player.prototype.handleCollision = function() {
@@ -57,7 +68,9 @@ Player.prototype.handleCollision = function() {
         if (enemy.x+50 > player.x && enemy.x+50 < player.x+101 &&
             enemy.x+66 > player.x && enemy.x+66 < player.x+101 &&
             enemy.y > player.y && enemy.y < player.y+83) {
-            this.setPosition(202,386)
+            this.setPosition(202,386);
+            this.score--;
+            this.life--; //tengo que implementar esto
         };
     };
 };
@@ -70,8 +83,11 @@ Player.prototype.handleInput = function(key) {
     if (key == 'up') {
         if (this.y>386-86*3) {
             this.y-=83;
-        } else
+        } else {
+            //Cuando llega a la meta, se resetea player, score aumenta y los bugs se ponen mas y mas locos.
             this.setPosition(202,386);
+            this.score++;
+        }
     };
 
     if (key == 'right' && this.x<404) {
@@ -91,11 +107,11 @@ Player.prototype.setPosition = function(x,y) {
 // Now instantiate your objects.
 // Place all enemy objects in an array called allEnemies
 // Place the player object in a variable called player
+var player = new Player();
 var allEnemies = [];
 allEnemies.push(new Enemy(0));
 allEnemies.push(new Enemy(1));
 allEnemies.push(new Enemy(2));
-var player = new Player();
 
 
 // This listens for key presses and sends the keys to your
